@@ -1,0 +1,264 @@
+﻿@{
+    ViewData["Title"] = "MoodTracker - Your Personal Journal & Mood Tracking Companion";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<Users> SignInManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="landing-body">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6">
+                    <h1 class="hero-title animate-fade-in">
+                        <span class="gradient-text">Track Your Journey</span><br />
+                        One Entry at a Time
+                    </h1>
+                    <p class="hero-subtitle animate-slide-up">
+                        A beautiful, secure, and feature-rich platform for journaling and mood tracking. 
+                        Express yourself with rich text, organize with tags, and gain insights into your emotional patterns.
+                    </p>
+                    @if (!SignInManager.IsSignedIn(User))
+                    {
+                        <div class="hero-buttons animate-slide-up-delay">
+                            <a asp-controller="Account" asp-action="Register" class="btn btn-hero-primary">
+                                <i class="fas fa-rocket"></i> Get Started Free
+                            </a>
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-hero-secondary">
+                                <i class="fas fa-sign-in-alt"></i> Sign In
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="hero-buttons animate-slide-up-delay">
+                            <a asp-controller="Journal" asp-action="Index" class="btn btn-hero-primary">
+                                <i class="fas fa-journal-whills"></i> Go to Journal
+                            </a>
+                            <a asp-controller="Mood" asp-action="Index" class="btn btn-hero-secondary">
+                                <i class="fas fa-heart"></i> Track Mood
+                            </a>
+                        </div>
+                    }
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image animate-float">
+                        <div class="feature-card-preview">
+                            <i class="fas fa-journal-whills"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5" id="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-subtitle">Everything you need for mindful journaling</p>
+            </div>
+            <div class="row g-4">
+                <!-- Feature 1: Rich Text Editor -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h3>Rich Text & Markdown</h3>
+                        <p>Write beautifully with our powerful rich text editor. Support for markdown, formatting, and more.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 2: Tagging System -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <h3>Smart Tagging</h3>
+                        <p>Organize your entries with custom tags. Find what you're looking for instantly with our smart search.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3: Calendar Navigation -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3>Calendar Navigation</h3>
+                        <p>Navigate through your journal entries with an intuitive calendar view. See your journey at a glance.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 4: Mood Tracking -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Mood Tracker</h3>
+                        <p>Track your emotional patterns over time. Visualize your moods and understand your emotional journey.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 5: Streak Tracking -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <h3>Streak Tracking</h3>
+                        <p>Build consistency with streak tracking. See how many days you've journaled in a row.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 6: Search & Filter -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Search & Filter</h3>
+                        <p>Find entries quickly with powerful search and filter options. Search by content, tags, or date.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 7: Security -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>PIN Protection</h3>
+                        <p>Keep your private entries secure with PIN or password protection. Your thoughts stay private.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 8: Export -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <h3>Export Journals</h3>
+                        <p>Export your journals in multiple formats - PDF, JSON, or CSV. Take your data with you.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 9: Analytics -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Analytics & Insights</h3>
+                        <p>Gain insights into your journaling patterns and mood trends with beautiful analytics dashboard.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 10: Theme Customization -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <h3>Theme Customization</h3>
+                        <p>Personalize your experience with light, dark, or custom themes. Make it yours.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 11: Pagination -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <h3>Paginated Views</h3>
+                        <p>Browse through your entries effortlessly with paginated journal views. Never lose your place.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 12: Privacy -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Privacy First</h3>
+                        <p>Your data is encrypted and secure. We prioritize your privacy and data protection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Get started in three simple steps</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3>Sign Up</h3>
+                        <p>Create your free account in seconds. No credit card required.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3>Start Journaling</h3>
+                        <p>Write your first entry using our beautiful rich text editor.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3>Track & Analyze</h3>
+                        <p>Track your moods and gain insights into your emotional patterns.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    @if (!SignInManager.IsSignedIn(User))
+    {
+        <section class="cta-section py-5">
+            <div class="container text-center">
+                <h2 class="cta-title">Ready to Start Your Journey?</h2>
+                <p class="cta-subtitle">Join thousands of users who are already tracking their moods and journaling their thoughts.</p>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-cta">
+                    <i class="fas fa-rocket"></i> Get Started Now
+                </a>
+            </div>
+        </section>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/landing.js" asp-append-version="true"></script>
+</body>
+</html>

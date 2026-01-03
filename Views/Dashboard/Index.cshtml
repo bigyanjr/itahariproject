@@ -1,0 +1,294 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var totalEntries = ViewBag.TotalEntries as int? ?? 0;
+    var entriesLast30Days = ViewBag.EntriesLast30Days as int? ?? 0;
+    var entriesLast7Days = ViewBag.EntriesLast7Days as int? ?? 0;
+    var streak = ViewBag.Streak as int? ?? 0;
+    var moodCounts = ViewBag.MoodCounts as dynamic;
+    var averageIntensity = ViewBag.AverageIntensity as double? ?? 0;
+    var recentEntries = ViewBag.RecentEntries as List<UsersApp.Models.JournalEntry> ?? new List<UsersApp.Models.JournalEntry>();
+    var moodTrend = ViewBag.MoodTrend as dynamic;
+}
+
+<div class="dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-line"></i> Dashboard & Analytics</h2>
+        <div>
+            <a href="@Url.Action("Index", "Journal")" class="btn btn-outline-primary">
+                <i class="fas fa-calendar"></i> Calendar View
+            </a>
+            <a href="@Url.Action("List", "Journal")" class="btn btn-outline-primary">
+                <i class="fas fa-list"></i> List View
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                    <i class="fas fa-journal-whills"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@totalEntries</h3>
+                    <p>Total Entries</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@streak</h3>
+                    <p>Day Streak</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-card-info">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@entriesLast7Days</h3>
+                    <p>Last 7 Days</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>@entriesLast30Days</h3>
+                    <p>Last 30 Days</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Mood Statistics -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-heart"></i> Mood Statistics (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    @if (moodCounts != null && moodCounts.Count > 0)
+                    {
+                        <div class="mood-stats">
+                            @foreach (var mood in moodCounts)
+                            {
+                                <div class="mood-stat-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="mood-name">@mood.Mood</span>
+                                        <span class="mood-count">@mood.Count</span>
+                                    </div>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: @((mood.Count * 100.0 / entriesLast30Days))%" 
+                                             aria-valuenow="@mood.Count" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="@entriesLast30Days">
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="mt-3">
+                            <strong>Average Intensity:</strong> @averageIntensity / 10
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">
+                            <i class="fas fa-info-circle"></i> No mood data available. 
+                            <a href="@Url.Action("Index", "Mood")">Start tracking your moods!</a>
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Entries -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-clock"></i> Recent Entries</h5>
+                </div>
+                <div class="card-body">
+                    @if (recentEntries.Any())
+                    {
+                        <div class="recent-entries-list">
+                            @foreach (var entry in recentEntries)
+                            {
+                                <div class="recent-entry-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6>
+                                                <a href="@Url.Action("ViewEntry", "Journal", new { id = entry.Id })">
+                                                    @(string.IsNullOrEmpty(entry.Title) ? "Untitled" : entry.Title)
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar"></i> @entry.EntryDate.ToString("MMM dd, yyyy")
+                                            </small>
+                                        </div>
+                                        @if (entry.IsProtected)
+                                        {
+                                            <i class="fas fa-lock text-warning"></i>
+                                        }
+                                    </div>
+                                    <p class="entry-preview mt-2">
+                                        @(entry.Content.Length > 100 ? entry.Content.Substring(0, 100) + "..." : entry.Content)
+                                    </p>
+                                </div>
+                            }
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="@Url.Action("List", "Journal")" class="btn btn-sm btn-outline-primary">
+                                View All Entries <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-4">
+                            <i class="fas fa-journal-whills fa-3x mb-3"></i><br />
+                            No entries yet. 
+                            <a href="@Url.Action("Create", "Journal")">Create your first entry!</a>
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card-primary {
+        border-left-color: #667eea;
+    }
+
+    .stat-card-success {
+        border-left-color: #28a745;
+    }
+
+    .stat-card-info {
+        border-left-color: #17a2b8;
+    }
+
+    .stat-card-warning {
+        border-left-color: #ffc107;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-card-primary .stat-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-card-success .stat-icon {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .stat-card-info .stat-icon {
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
+    .stat-card-warning .stat-icon {
+        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    }
+
+    .stat-content h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: #333;
+    }
+
+    .stat-content p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .mood-stat-item {
+        padding: 0.5rem 0;
+    }
+
+    .mood-name {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .mood-count {
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    .recent-entry-item {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s ease;
+    }
+
+    .recent-entry-item:hover {
+        background: #f8f9fa;
+    }
+
+    .recent-entry-item:last-child {
+        border-bottom: none;
+    }
+
+    .recent-entry-item h6 {
+        margin: 0;
+    }
+
+    .recent-entry-item h6 a {
+        color: #333;
+        text-decoration: none;
+    }
+
+    .recent-entry-item h6 a:hover {
+        color: #667eea;
+    }
+
+    .entry-preview {
+        color: #666;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+</style>
+

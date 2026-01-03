@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Verify PIN";
+    var entryId = ViewBag.EntryId as int?;
+}
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="card shadow-lg" style="max-width: 400px; width: 100%;">
+        <div class="card-header bg-warning text-dark text-center">
+            <h4><i class="fas fa-lock"></i> Protected Entry</h4>
+        </div>
+        <div class="card-body">
+            <p class="text-center mb-4">This journal entry is protected. Please enter your PIN to view it.</p>
+            
+            <form method="post" asp-action="VerifyPin">
+                <input type="hidden" name="entryId" value="@entryId" />
+                
+                <div class="mb-3">
+                    <label for="pin" class="form-label">PIN</label>
+                    <input type="password" name="pin" id="pin" class="form-control form-control-lg text-center" 
+                           placeholder="Enter PIN" autofocus required maxlength="20" />
+                </div>
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-unlock"></i> Unlock Entry
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="@Url.Action("List")" class="text-muted">
+                    <i class="fas fa-arrow-left"></i> Back to Journal
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('pin').focus();
+    </script>
+}
+

@@ -1,0 +1,128 @@
+@model IEnumerable<UsersApp.Models.MoodEntry>
+@{
+    ViewData["Title"] = "Mood Tracker";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>😊 Mood Tracker</h2>
+    <div>
+        <a href="@Url.Action("Create")" class="btn btn-primary">+ Track Mood</a>
+        <a href="@Url.Action("Statistics")" class="btn btn-outline-primary">Statistics</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="@Url.Action("Index", new { year = ViewBag.PrevMonth.Year, month = ViewBag.PrevMonth.Month })" 
+               class="btn btn-outline-primary">← Previous</a>
+            <h4 class="mb-0">@ViewBag.MonthName</h4>
+            <a href="@Url.Action("Index", new { year = ViewBag.NextMonth.Year, month = ViewBag.NextMonth.Month })" 
+               class="btn btn-outline-primary">Next →</a>
+        </div>
+
+        @{
+            var moodsByDate = ViewBag.MoodsByDate as Dictionary<DateTime, string> ?? new Dictionary<DateTime, string>();
+            var firstDay = new DateTime((int)ViewBag.Year, (int)ViewBag.Month, 1);
+            var lastDay = firstDay.AddMonths(1).AddDays(-1);
+            var startDate = firstDay.AddDays(-(int)firstDay.DayOfWeek); // Start from Sunday
+            var endDate = startDate.AddDays(41); // 6 weeks
+        }
+
+        <div class="calendar-grid">
+            <div class="row text-center fw-bold mb-2">
+                <div class="col">Sun</div>
+                <div class="col">Mon</div>
+                <div class="col">Tue</div>
+                <div class="col">Wed</div>
+                <div class="col">Thu</div>
+                <div class="col">Fri</div>
+                <div class="col">Sat</div>
+            </div>
+ @* Outer loop: weeks *@
+            @for (var weekStart = startDate; weekStart <= endDate; weekStart = weekStart.AddDays(7))
+            {
+                <div class="row">
+                    @* Inner loop: days of the week *@
+                    @for (var d = weekStart; d < weekStart.AddDays(7); d = d.AddDays(1))
+                    {
+                        var isCurrentMonth = d.Month == (int)ViewBag.Month;
+                        var hasMood = moodsByDate.ContainsKey(d.Date);
+                        var mood = hasMood ? moodsByDate[d.Date] : "";
+                        var dayClass = isCurrentMonth ? "calendar-day" : "calendar-day text-muted";
+                        if (hasMood) dayClass += " has-mood";
+                        if (d.Date == DateTime.Today) dayClass += " border-primary border-2";
+
+                        <div class="col @dayClass" onclick="location.href='@Url.Action("Create", new { date = d.Date })'">
+                            <div class="fw-bold">@d.Day</div>
+                            @if (hasMood)
+                            {
+                                <div class="mood-indicator mood-@mood.ToLower()" title="@mood"></div>
+                                <small class="d-block text-primary">@mood</small>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Recent Mood Entries</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="list-group">
+                @foreach (var entry in Model.Take(10))
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">
+                                    <span class="mood-indicator mood-@entry.Mood.ToLower()"></span>
+                                    @entry.Mood
+                                    @if (entry.Intensity.HasValue)
+                                    {
+                                        <span class="badge bg-secondary">Intensity: @entry.Intensity/10</span>
+                                    }
+                                </h6>
+                                @if (!string.IsNullOrEmpty(entry.Notes))
+                                {
+                                    <p class="mb-1">@entry.Notes</p>
+                                }
+                            </div>
+                            <div>
+                                <small class="text-muted">@entry.EntryDate.ToString("MMM dd, yyyy")</small>
+                                <form asp-action="Delete" method="post" class="d-inline ms-2">
+                                    <input type="hidden" name="id" value="@entry.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this mood entry?')">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No mood entries yet. <a href="@Url.Action("Create")">Track your first mood!</a></p>
+        }
+    </div>
+</div>
+
+<style>
+    .calendar-grid {
+        display: grid;
+    }
+    .calendar-day {
+        min-height: 100px;
+        cursor: pointer;
+    }
+    .calendar-day.has-mood {
+        background-color: #f0f8ff;
+        border-radius: 5px;
+    }
+</style>

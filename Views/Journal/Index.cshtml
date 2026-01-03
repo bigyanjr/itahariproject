@@ -1,0 +1,197 @@
+@model IEnumerable<UsersApp.Models.JournalEntry>
+@{
+    ViewData["Title"] = "Journal Calendar";
+}
+
+<div class="calendar-container">
+    <!-- Calendar header and nav buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-calendar-alt"></i> Journal Calendar</h2>
+        <div>
+            <a href="@Url.Action("List")" class="btn btn-outline-primary me-2">
+                <i class="fas fa-list"></i> List View
+            </a>
+            <a href="@Url.Action("Create")" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Entry
+            </a>
+        </div>
+    </div>
+
+    <!-- Calendar card -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a href="@Url.Action("Index", new { year = ViewBag.PrevMonth.Year, month = ViewBag.PrevMonth.Month })" 
+                   class="btn btn-outline-primary calendar-nav-btn">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </a>
+                <h3 class="mb-0 calendar-month-title">@ViewBag.MonthName</h3>
+                <a href="@Url.Action("Index", new { year = ViewBag.NextMonth.Year, month = ViewBag.NextMonth.Month })" 
+                   class="btn btn-outline-primary calendar-nav-btn">
+                    Next <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+
+            @{
+                var entriesByDate = ViewBag.EntriesByDate as Dictionary<DateTime, List<UsersApp.Models.JournalEntry>> ?? new Dictionary<DateTime, List<UsersApp.Models.JournalEntry>>();
+                var firstDay = new DateTime((int)ViewBag.Year, (int)ViewBag.Month, 1);
+                var lastDay = firstDay.AddMonths(1).AddDays(-1);
+                var startDate = firstDay.AddDays(-(int)firstDay.DayOfWeek);
+                var endDate = startDate.AddDays(41);
+            }
+
+            <div class="calendar-wrapper">
+                <div class="calendar-header">
+                    <div class="calendar-day-name">Sun</div>
+                    <div class="calendar-day-name">Mon</div>
+                    <div class="calendar-day-name">Tue</div>
+                    <div class="calendar-day-name">Wed</div>
+                    <div class="calendar-day-name">Thu</div>
+                    <div class="calendar-day-name">Fri</div>
+                    <div class="calendar-day-name">Sat</div>
+                </div>
+                <div class="calendar-grid">
+                    @for (var date = startDate; date <= endDate; date = date.AddDays(7))
+                    {
+                        @for (var d = date; d < date.AddDays(7); d = d.AddDays(1))
+                        {
+                            var isCurrentMonth = d.Month == (int)ViewBag.Month;
+                            var hasEntry = entriesByDate.ContainsKey(d.Date);
+                            var isToday = d.Date == DateTime.Today;
+                            var entryCount = hasEntry ? entriesByDate[d.Date].Count : 0;
+
+                            var dayClass = "calendar-day-cell";
+                            if (!isCurrentMonth) dayClass += " other-month";
+                            if (hasEntry) dayClass += " has-entry";
+                            if (isToday) dayClass += " today";
+
+                            <div class="@dayClass" onclick="location.href='@Url.Action("ViewEntry", new { date = d.Date })'">
+                                <div class="calendar-day-number @(isToday ? "today-badge" : "")">@d.Day</div>
+                                @if (hasEntry)
+                                {
+                                    <div class="calendar-entry-indicator">
+                                        <i class="fas fa-journal-whills"></i>
+                                        <span class="entry-count">@entryCount</span>
+                                    </div>
+                                }
+                                @if (isToday)
+                                {
+                                    <div class="today-marker"></div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent entries card -->
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h5><i class="fas fa-clock"></i> Recent Entries</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="recent-entries-list">
+                    @foreach (var entry in Model.Take(10))
+                    {
+                        <div class="recent-entry-item">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6>
+                                        <a href="@Url.Action("ViewEntry", new { id = entry.Id })">
+                                            @if (entry.IsProtected)
+                                            {
+                                                <i class="fas fa-lock text-warning"></i>
+                                            }
+                                            @(string.IsNullOrEmpty(entry.Title) ? "Untitled" : entry.Title)
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar"></i> @entry.EntryDate.ToString("MMM dd, yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                            <p class="entry-preview mt-2">
+                                @(entry.Content.Length > 150 ? entry.Content.Substring(0, 150) + "..." : entry.Content)
+                            </p>
+                            @if (!string.IsNullOrEmpty(entry.Tags))
+                            {
+                                <div class="journal-tags mt-2">
+                                    @foreach (var tag in entry.TagList)
+                                    {
+                                        <span class="badge bg-primary">@tag</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-journal-whills fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No entries yet. <a href="@Url.Action("Create")">Create your first entry!</a></p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- FIXED CSS -->
+<style>
+    /* Calendar styles */
+    .calendar-container { max-width: 1200px; margin: 0 auto; }
+    .calendar-nav-btn { transition: all 0.3s ease; }
+    .calendar-nav-btn:hover { transform: translateX(5px); }
+    .calendar-month-title { font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 2px; }
+    .calendar-wrapper { background: var(--bg-primary); border-radius: 15px; padding: 20px; box-shadow: 0 2px 10px var(--shadow); }
+    .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--border-color); }
+    .calendar-day-name { text-align: center; font-weight: 700; color: var(--accent-color); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+    .calendar-day-cell { min-height: 100px; padding: 10px; border: 2px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: all 0.3s ease; background: var(--bg-primary); position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+    .calendar-day-cell:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 25px var(--shadow); border-color: var(--accent-color); }
+    .calendar-day-cell.other-month { opacity: 0.4; background: var(--bg-secondary); }
+    .calendar-day-cell.has-entry { background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%); border-color: var(--accent-color); font-weight: 600; }
+    .calendar-day-cell.today { border-color: var(--accent-color); border-width: 3px; background: linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.15) 100%); }
+    .calendar-day-number { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
+    .today-badge { background: var(--accent-color); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .calendar-entry-indicator { display: flex; align-items: center; gap: 5px; color: var(--accent-color); font-size: 0.85rem; margin-top: auto; }
+    .entry-count { font-weight: 700; }
+
+    /* Razor-safe keyframes */
+    @@keyframes pulse {
+        0%, 100% { opacity:1; transform:scale(1); }
+        50% { opacity:0.7; transform:scale(1.2); }
+    }
+
+    .today-marker {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 8px;
+        height: 8px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    /* Recent entries */
+    .recent-entry-item { padding:1rem; border-bottom:1px solid var(--border-color); transition: all 0.3s ease; border-radius:8px; margin-bottom:0.5rem; }
+    .recent-entry-item:hover { background: var(--bg-secondary); transform:translateX(5px); }
+    .recent-entry-item:last-child { border-bottom:none; }
+    .recent-entry-item h6 { margin:0; }
+    .recent-entry-item h6 a { color: var(--text-primary); text-decoration:none; transition:color 0.3s ease; }
+    .recent-entry-item h6 a:hover { color: var(--accent-color); }
+    .entry-preview { color: var(--text-secondary); font-size:0.9rem; margin:0; line-height:1.6; }
+
+    /* Razor-safe media query */
+    @@media (max-width: 768px) {
+        .calendar-day-cell { min-height:70px; padding:5px; }
+        .calendar-day-number { font-size:0.9rem; }
+        .calendar-entry-indicator { font-size:0.7rem; }
+    }
+</style>

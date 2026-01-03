@@ -1,0 +1,166 @@
+@model UsersApp.ViewModels.JournalListViewModel
+@{
+    ViewData["Title"] = "My Journal Entries";
+}
+
+<div class="journal-list-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-journal-whills"></i> My Journal Entries</h2>
+        <div>
+            <a href="@Url.Action("Create")" class="btn btn-primary me-2">
+                <i class="fas fa-plus"></i> New Entry
+            </a>
+            <a href="@Url.Action("Index")" class="btn btn-outline-primary me-2">
+                <i class="fas fa-calendar"></i> Calendar View
+            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="@Url.Action("Export", new { format = "json" })">Export as JSON</a></li>
+                    <li><a class="dropdown-item" href="@Url.Action("Export", new { format = "csv" })">Export as CSV</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4 filter-card">
+        <div class="card-body">
+            <form method="get" action="@Url.Action("List")" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search entries..." value="@Model.SearchQuery">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tag</label>
+                    <select name="tag" class="form-select">
+                        <option value="">All Tags</option>
+                        @foreach (var tag in Model.AllTags)
+                        {
+                            <option value="@tag" selected="@(Model.TagFilter == tag)">@tag</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="dateFrom" class="form-control" value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="dateTo" class="form-control" value="@(Model.DateTo?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Journal Entries List -->
+    @if (Model.Entries.Any())
+    {
+        <div class="row g-4">
+            @foreach (var entry in Model.Entries)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="journal-card">
+                        <div class="journal-card-header">
+                            <h5 class="journal-card-title">
+                                @if (entry.IsProtected)
+                                {
+                                    <i class="fas fa-lock text-warning"></i>
+                                }
+                                @(string.IsNullOrEmpty(entry.Title) ? "Untitled" : entry.Title)
+                            </h5>
+                            <div class="journal-card-actions">
+                                <a href="@Url.Action("ViewEntry", new { id = entry.Id })" class="btn btn-sm btn-link">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="@Url.Action("Edit", new { id = entry.Id })" class="btn btn-sm btn-link">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="journal-card-body">
+                            <p class="journal-card-date">
+                                <i class="fas fa-calendar"></i> @entry.EntryDate.ToString("MMM dd, yyyy")
+                            </p>
+                            <p class="journal-card-content">@Html.Raw(entry.Content)</p>
+                            @if (!string.IsNullOrEmpty(entry.Tags))
+                            {
+                                <div class="journal-tags">
+                                    @foreach (var tag in entry.TagList)
+                                    {
+                                        <span class="badge bg-primary">@tag</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Journal pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("List", new { page = Model.CurrentPage - 1, search = Model.SearchQuery, tag = Model.TagFilter, dateFrom = Model.DateFrom, dateTo = Model.DateTo })">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                    }
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("List", new { page = i, search = Model.SearchQuery, tag = Model.TagFilter, dateFrom = Model.DateFrom, dateTo = Model.DateTo })">@i</a>
+                        </li>
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("List", new { page = Model.CurrentPage + 1, search = Model.SearchQuery, tag = Model.TagFilter, dateFrom = Model.DateFrom, dateTo = Model.DateTo })">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-journal-whills fa-5x text-muted mb-3"></i>
+            <h4>No entries found</h4>
+            <p class="text-muted">@(string.IsNullOrEmpty(Model.SearchQuery) ? "Start by creating your first journal entry!" : "Try adjusting your search filters.")</p>
+            <a href="@Url.Action("Create")" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create First Entry
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Add smooth animations
+        document.querySelectorAll('.journal-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    </script>
+}
+

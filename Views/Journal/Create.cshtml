@@ -1,0 +1,273 @@
+@model UsersApp.ViewModels.JournalEntryViewModel
+@{
+    ViewData["Title"] = "Create Journal Entry";
+}
+
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    .editor-container {
+        min-height: 300px;
+        margin-bottom: 20px;
+    }
+    .tag-input-container {
+        position: relative;
+    }
+    .tag-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    .tag-suggestion-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+    }
+    .tag-suggestion-item:hover {
+        background: #f8f9fa;
+    }
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .tag-item {
+        background: #667eea;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    .tag-item .remove-tag {
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .tag-item .remove-tag:hover {
+        opacity: 0.8;
+    }
+</style>
+
+<div class="journal-editor-container">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="fas fa-edit"></i> Create Journal Entry</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" id="journalForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="EntryDate" class="form-label">Date</label>
+                        <input asp-for="EntryDate" type="date" class="form-control" />
+                        <span asp-validation-for="EntryDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Title" class="form-label">Title (Optional)</label>
+                        <input asp-for="Title" class="form-control" placeholder="Give your entry a title..." />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <div id="editor" class="editor-container"></div>
+                    <input type="hidden" asp-for="Content" id="contentInput" />
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tags</label>
+                    <div class="tag-input-container">
+                        <input type="text" id="tagInput" class="form-control" placeholder="Type a tag and press Enter..." />
+                        <div class="tag-suggestions" id="tagSuggestions"></div>
+                    </div>
+                    <div class="tag-list" id="tagList"></div>
+                    <input type="hidden" asp-for="Tags" id="tagsInput" />
+                    <small class="text-muted">Press Enter to add a tag</small>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input asp-for="IsProtected" class="form-check-input" type="checkbox" id="isProtected" />
+                        <label class="form-check-label" for="isProtected">
+                            <i class="fas fa-lock"></i> Protect this entry with PIN
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3" id="pinSection" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label asp-for="Pin" class="form-label">PIN</label>
+                            <input asp-for="Pin" type="password" class="form-control" placeholder="Enter PIN (4-20 characters)" maxlength="20" />
+                            <span asp-validation-for="Pin" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="VerifyPin" class="form-label">Confirm PIN</label>
+                            <input asp-for="VerifyPin" type="password" class="form-control" placeholder="Confirm PIN" maxlength="20" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Entry
+                    </button>
+                    <a href="@Url.Action("List")" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        // Initialize Quill editor
+        var quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    ['link', 'image'],
+                    ['blockquote', 'code-block'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Write your thoughts here...'
+        });
+
+        // Get existing tags from server (you can load this via AJAX)
+        var existingTags = [];
+
+        // Tag management
+        var tags = [];
+        var tagInput = document.getElementById('tagInput');
+        var tagList = document.getElementById('tagList');
+        var tagsInput = document.getElementById('tagsInput');
+        var tagSuggestions = document.getElementById('tagSuggestions');
+
+        tagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag(tagInput.value.trim());
+                tagInput.value = '';
+                tagSuggestions.style.display = 'none';
+            } else if (e.key === 'Escape') {
+                tagSuggestions.style.display = 'none';
+            }
+        });
+
+        tagInput.addEventListener('input', function() {
+            var value = tagInput.value.trim();
+            if (value.length > 0) {
+                // Show suggestions (filter existing tags)
+                var suggestions = existingTags.filter(t => 
+                    t.toLowerCase().includes(value.toLowerCase()) && !tags.includes(t)
+                );
+                showSuggestions(suggestions);
+            } else {
+                tagSuggestions.style.display = 'none';
+            }
+        });
+
+        function showSuggestions(suggestions) {
+            if (suggestions.length > 0) {
+                tagSuggestions.innerHTML = suggestions.map(tag => 
+                    `<div class="tag-suggestion-item" onclick="selectTag('${tag}')">${tag}</div>`
+                ).join('');
+                tagSuggestions.style.display = 'block';
+            } else {
+                tagSuggestions.style.display = 'none';
+            }
+        }
+
+        function selectTag(tag) {
+            addTag(tag);
+            tagInput.value = '';
+            tagSuggestions.style.display = 'none';
+        }
+
+        function addTag(tag) {
+            if (tag && !tags.includes(tag)) {
+                tags.push(tag);
+                updateTagList();
+                updateTagsInput();
+            }
+        }
+
+        function removeTag(tag) {
+            tags = tags.filter(t => t !== tag);
+            updateTagList();
+            updateTagsInput();
+        }
+
+        function updateTagList() {
+            tagList.innerHTML = tags.map(tag => 
+                `<span class="tag-item">
+                    ${tag}
+                    <span class="remove-tag" onclick="removeTag('${tag}')">×</span>
+                </span>`
+            ).join('');
+        }
+
+        function updateTagsInput() {
+            tagsInput.value = tags.join(',');
+        }
+
+        // PIN protection toggle
+        document.getElementById('isProtected').addEventListener('change', function() {
+            document.getElementById('pinSection').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Form submission
+        document.getElementById('journalForm').addEventListener('submit', function(e) {
+            // Get HTML content from Quill
+            var content = quill.root.innerHTML;
+            document.getElementById('contentInput').value = content;
+
+            // Validate PIN if protected
+            if (document.getElementById('isProtected').checked) {
+                var pin = document.querySelector('[name="Pin"]').value;
+                var verifyPin = document.querySelector('[name="VerifyPin"]').value;
+                if (pin !== verifyPin) {
+                    e.preventDefault();
+                    alert('PINs do not match!');
+                    return false;
+                }
+                if (pin.length < 4) {
+                    e.preventDefault();
+                    alert('PIN must be at least 4 characters!');
+                    return false;
+                }
+            }
+        });
+
+        // Click outside to close suggestions
+        document.addEventListener('click', function(e) {
+            if (!tagInput.contains(e.target) && !tagSuggestions.contains(e.target)) {
+                tagSuggestions.style.display = 'none';
+            }
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

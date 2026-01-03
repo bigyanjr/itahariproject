@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Mood Statistics";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📊 Mood Statistics</h2>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Back to Calendar</a>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Total Entries</h5>
+                <h2 class="text-primary">@ViewBag.TotalEntries</h2>
+                <p class="text-muted">Last 30 days</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Average Intensity</h5>
+                <h2 class="text-primary">@(ViewBag.AverageIntensity != null ? Math.Round((decimal)ViewBag.AverageIntensity, 1) : "N/A")</h2>
+                <p class="text-muted">Out of 10</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Most Common Mood</h5>
+                <h2 class="text-primary">
+                    @if (ViewBag.MoodCounts != null && ((dynamic)ViewBag.MoodCounts).Count > 0)
+                    {
+                        @(((dynamic)ViewBag.MoodCounts)[0].Mood)
+                    }
+                    else
+                    {
+                        <text>N/A</text>
+                    }
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Mood Distribution</h5>
+    </div>
+    <div class="card-body">
+        @if (ViewBag.MoodCounts != null)
+        {
+            var moodCounts = (dynamic)ViewBag.MoodCounts;
+            var total = (int)ViewBag.TotalEntries;
+            
+            @foreach (var item in moodCounts)
+            {
+                var percentage = total > 0 ? (item.Count * 100.0 / total) : 0;
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>
+                            <span class="mood-indicator mood-@item.Mood.ToLower()"></span>
+                            <strong>@item.Mood</strong>
+                        </span>
+                        <span>@item.Count entries (@Math.Round(percentage, 1)%)</span>
+                    </div>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: @percentage%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" 
+                             aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100">
+                            @item.Count
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted">No mood data available yet. Start tracking your moods to see statistics!</p>
+        }
+    </div>
+</div>
+
