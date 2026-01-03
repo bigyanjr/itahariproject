@@ -1,56 +1,215 @@
 @model UsersApp.ViewModels.MoodEntryViewModel
 @{
     ViewData["Title"] = Model.Id.HasValue ? "Edit Mood Entry" : "Track Mood";
-    var moods = new[] { "Happy", "Sad", "Anxious", "Calm", "Excited", "Tired", "Energetic" };
+    var moods = new[] { "Awesome", "Good", "Bad", "Horrible" };
+    var moodEmojis = new Dictionary<string, string> 
+    { 
+        { "Awesome", "😄" }, 
+        { "Good", "😊" }, 
+        { "Bad", "😔" }, 
+        { "Horrible", "😢" } 
+    };
+    var moodColors = new Dictionary<string, string> 
+    { 
+        { "Awesome", "#ffd700" }, 
+        { "Good", "#90ee90" }, 
+        { "Bad", "#ffb6c1" }, 
+        { "Horrible", "#ff6347" } 
+    };
 }
 
-<div class="card">
-    <div class="card-header">
-        <h3>😊 @(Model.Id.HasValue ? "Edit" : "Track") Mood</h3>
-    </div>
-    <div class="card-body">
-        <form asp-action="Create" method="post">
+<div class="mood-tracker-container">
+    <div class="mood-selection-card">
+        <h2 class="text-center mb-4">How are you feeling today?</h2>
+        
+        <form asp-action="Create" method="post" id="moodForm">
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Mood" id="selectedMood" />
+            <input type="hidden" asp-for="EntryDate" value="@(Model.EntryDate == default(DateTime) ? DateTime.Today : Model.EntryDate)" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             
-            <div class="mb-3">
-                <label asp-for="EntryDate" class="form-label">Date</label>
-                <input asp-for="EntryDate" type="date" class="form-control" />
-                <span asp-validation-for="EntryDate" class="text-danger"></span>
+            <div class="mood-options">
+                @foreach (var mood in moods)
+                {
+                    <div class="mood-option" data-mood="@mood" style="background-color: @moodColors[mood];">
+                        <div class="mood-emoji-large">@moodEmojis[mood]</div>
+                        <div class="mood-label">@mood</div>
+                    </div>
+                }
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Mood" class="form-label">How are you feeling?</label>
-                <select asp-for="Mood" class="form-select">
-                    <option value="">Select a mood...</option>
-                    @foreach (var mood in moods)
-                    {
-                        <option value="@mood">@mood</option>
-                    }
-                </select>
-                <span asp-validation-for="Mood" class="text-danger"></span>
-            </div>
+            <div class="mood-buttons mt-4" style="display: none;" id="moodButtons">
+                <div class="selected-mood-display mb-3">
+                    <div class="selected-mood-emoji" id="selectedMoodEmoji"></div>
+                    <div class="selected-mood-label" id="selectedMoodLabel"></div>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Intensity" class="form-label">Intensity (1-10, Optional)</label>
-                <input asp-for="Intensity" type="number" min="1" max="10" class="form-control" placeholder="Rate the intensity of this mood" />
-                <small class="form-text text-muted">1 = Very mild, 10 = Very intense</small>
-                <span asp-validation-for="Intensity" class="text-danger"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="Notes" class="form-label">Notes (Optional)</label>
+                    <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Add any notes about your mood..."></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Notes" class="form-label">Notes (Optional)</label>
-                <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Add any notes about your mood..."></textarea>
-                <span asp-validation-for="Notes" class="text-danger"></span>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Save Mood</button>
-                <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-done">Done</button>
+                    <a href="@Url.Action("Index")" class="btn btn-cancel">Cancel</a>
+                </div>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    .mood-tracker-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .mood-selection-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .mood-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .mood-option {
+        border-radius: 15px;
+        padding: 30px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid transparent;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mood-option:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .mood-option.selected {
+        border-color: #333;
+        border-width: 4px;
+        transform: scale(1.1);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .mood-emoji-large {
+        font-size: 4rem;
+        margin-bottom: 10px;
+    }
+
+    .mood-label {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .selected-mood-display {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+
+    .selected-mood-emoji {
+        font-size: 5rem;
+        margin-bottom: 10px;
+    }
+
+    .selected-mood-label {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .btn-done {
+        background: #333;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 40px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .btn-done:hover {
+        background: #555;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-cancel {
+        background: #e0e0e0;
+        color: #333;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 40px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #d0d0d0;
+        transform: translateY(-2px);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const moodOptions = document.querySelectorAll('.mood-option');
+        const selectedMoodInput = document.getElementById('selectedMood');
+        const moodButtons = document.getElementById('moodButtons');
+        const selectedMoodEmoji = document.getElementById('selectedMoodEmoji');
+        const selectedMoodLabel = document.getElementById('selectedMoodLabel');
+        
+        const moodEmojis = {
+            'Awesome': '😄',
+            'Good': '😊',
+            'Bad': '😔',
+            'Horrible': '😢'
+        };
+
+        moodOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected class from all options
+                moodOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                
+                // Set the selected mood
+                const mood = this.getAttribute('data-mood');
+                selectedMoodInput.value = mood;
+                
+                // Update display
+                selectedMoodEmoji.textContent = moodEmojis[mood];
+                selectedMoodLabel.textContent = mood;
+                
+                // Show buttons
+                moodButtons.style.display = 'block';
+            });
+        });
+    });
+</script>
 
 @section Scripts{
     @{

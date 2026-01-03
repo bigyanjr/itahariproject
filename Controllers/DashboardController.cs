@@ -73,6 +73,13 @@ namespace UsersApp.Controllers
                 .Take(5)
                 .ToListAsync();
 
+            // Calendar entry dates
+            var calendarEntryDates = await _context.JournalEntries
+                .Where(e => e.UserId == user.Id)
+                .Select(e => e.EntryDate.Date)
+                .Distinct()
+                .ToListAsync();
+
             // Mood trend (last 7 days)
             var moodTrend = await _context.MoodEntries
                 .Where(e => e.UserId == user.Id && e.EntryDate >= last7Days)
@@ -87,6 +94,7 @@ namespace UsersApp.Controllers
             ViewBag.MoodCounts = moodCounts;
             ViewBag.AverageIntensity = Math.Round(averageIntensity, 1);
             ViewBag.RecentEntries = recentEntries;
+            ViewBag.CalendarEntryDates = calendarEntryDates;
             ViewBag.MoodTrend = moodTrend;
 
             return View();

@@ -166,9 +166,6 @@
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/scopedcss/Views/Shared/_Layout.cshtml.rz.scp.css
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/scopedcss/bundle/UsersApp.styles.css
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/scopedcss/projectbundle/UsersApp.bundle.scp.css
-/Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/pfvj73j6po-4tydxihf6v.gz
-/Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/j1s6itzoou-go6x4tybh2.gz
-/Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/07eg2h2kx7-yg0r0p6ldr.gz
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/fzzrkyee59-61n19gt1b8.gz
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/yij36hegzl-irgatgivwx.gz
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/ruv0yhnwt2-fr7q2aak1r.gz
@@ -247,3 +244,6 @@
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/UsersApp.genruntimeconfig.cache
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/ref/UsersApp.dll
 /Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/UsersApp.sourcelink.json
+/Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/07eg2h2kx7-qi7stxu9kc.gz
+/Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/pfvj73j6po-pc7yp59yma.gz
+/Users/bigyan/Downloads/-moodtracking-main 6/obj/Debug/net9.0/compressed/j1s6itzoou-kl08r55ec2.gz

@@ -19,48 +19,35 @@ html {
 
 /* Theme Variables */
 :root[data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
+  --bg-primary: #fff0f5;
+  --bg-secondary: #ffe4e9;
   --text-primary: #333333;
-  --text-secondary: #666666;
-  --accent-color: #667eea;
-  --accent-color-2: #764ba2;
-  --border-color: #dee2e6;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --text-secondary: #ff69b4;
+  --accent-color: #ff1493;
+  --accent-color-2: #ff69b4;
+  --border-color: #ffb6c1;
+  --shadow: rgba(255, 20, 147, 0.15);
+  --mood-awesome: #ffd700;
+  --mood-good: #90ee90;
+  --mood-bad: #ffb6c1;
+  --mood-horrible: #ff6347;
 }
 
 :root[data-theme="dark"] {
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
+  --bg-primary: #2d1a2d;
+  --bg-secondary: #3d2a3d;
   --text-primary: #ffffff;
-  --text-secondary: #b0b0b0;
-  --accent-color: #8b9aff;
-  --accent-color-2: #a78bfa;
-  --border-color: #404040;
-  --shadow: rgba(0, 0, 0, 0.3);
+  --text-secondary: #ffb6c1;
+  --accent-color: #ff69b4;
+  --accent-color-2: #ff1493;
+  --border-color: #5a3a5a;
+  --shadow: rgba(255, 20, 147, 0.3);
+  --mood-awesome: #ffd700;
+  --mood-good: #90ee90;
+  --mood-bad: #ffb6c1;
+  --mood-horrible: #ff6347;
 }
 
-:root[data-theme="purple"] {
-  --bg-primary: #f5f3ff;
-  --bg-secondary: #ede9fe;
-  --text-primary: #4c1d95;
-  --text-secondary: #6d28d9;
-  --accent-color: #8b5cf6;
-  --accent-color-2: #7c3aed;
-  --border-color: #c4b5fd;
-  --shadow: rgba(139, 92, 246, 0.2);
-}
-
-:root[data-theme="blue"] {
-  --bg-primary: #eff6ff;
-  --bg-secondary: #dbeafe;
-  --text-primary: #1e3a8a;
-  --text-secondary: #3b82f6;
-  --accent-color: #3b82f6;
-  --accent-color-2: #2563eb;
-  --border-color: #93c5fd;
-  --shadow: rgba(59, 130, 246, 0.2);
-}
 
 body {
   margin-bottom: 60px;
@@ -75,12 +62,13 @@ body {
 }
 
 .container {
-  background-color: var(--bg-primary);
-  border-radius: 15px;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, rgba(255, 240, 245, 0.8) 100%);
+  border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 4px 6px var(--shadow);
+  box-shadow: 0 8px 25px var(--shadow);
   margin-top: 20px;
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid rgba(255, 182, 193, 0.2);
 }
 
 /* Calendar Styles */
@@ -124,6 +112,10 @@ body {
   transform: scale(1.2);
 }
 
+.mood-awesome { background-color: var(--mood-awesome); }
+.mood-good { background-color: var(--mood-good); }
+.mood-bad { background-color: var(--mood-bad); }
+.mood-horrible { background-color: var(--mood-horrible); }
 .mood-happy { background-color: #ffd700; }
 .mood-sad { background-color: #4169e1; }
 .mood-anxious { background-color: #ff6347; }
@@ -134,17 +126,18 @@ body {
 
 /* Card Styles */
 .card {
-  border-radius: 15px;
-  box-shadow: 0 2px 4px var(--shadow);
-  transition: all 0.3s ease;
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
+  border-radius: 20px;
+  box-shadow: 0 8px 25px var(--shadow);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 2px solid var(--border-color);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, rgba(255, 240, 245, 0.9) 100%);
   color: var(--text-primary);
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px var(--shadow);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 15px 40px var(--shadow);
+  border-color: var(--accent-color);
 }
 
 .card-header {
